@@ -171,6 +171,13 @@ SELECT COUNT(*)
 FROM payment
 WHERE customer_id = 594;
 
+-- How many different payment amounts were there?
+-- Counting DISTINCT values
+SELECT COUNT(DISTINCT amount)
+FROM payment;
+
+
+
 -- Calculate a column based on two other columns
 SELECT payment_id, rental_id, payment_id - rental_id AS difference
 FROM payment;
@@ -183,5 +190,107 @@ FROM payment;
 SELECT CONCAT(first_name, ' ', last_name) AS full_name
 FROM customer;
 
+
+-- GROUP BY Clause
+-- used with Aggregations
+
+SELECT COUNT(*)
+FROM payment 
+WHERE amount = 1.99;
+
+SELECT COUNT(*)
+FROM payment 
+WHERE amount = 2.99;
+
+SELECT amount, COUNT(*), SUM(amount), AVG(amount)
+FROM payment
+GROUP BY amount;
+
+-- columns selected from the table must also be used in the GROUP BY
+SELECT amount, customer_id, COUNT(*)
+FROM payment 
+GROUP BY amount; --ERROR: column "payment.customer_id" must appear in the GROUP BY clause or be used in an aggregate function
+
+SELECT amount, customer_id, COUNT(*)
+FROM payment 
+GROUP BY amount, customer_id
+ORDER BY customer_id;
+
+
+-- Query the payment to table to display the customers (by id) who have spent the most money
+SELECT customer_id, SUM(amount)
+FROM payment
+GROUP BY customer_id
+ORDER BY SUM(amount) DESC;
+
+-- Alias our aggregated column and use alias name in ORDER BY 
+SELECT customer_id, SUM(amount) AS total_spent
+FROM payment 
+GROUP BY customer_id 
+ORDER BY total_spent DESC;
+
+
+-- HAVING clause => HAVING is to GROUP BY/Aggregations as WHERE is to SELECT 
+SELECT *
+FROM customer 
+WHERE customer_id < 20;
+
+SELECT customer_id, SUM(amount) AS total_spent
+FROM payment 
+GROUP BY customer_id 
+HAVING COUNT(*) >= 40
+ORDER BY total_spent DESC;
+
+
+SELECT customer_id, COUNT(*)
+FROM payment
+GROUP BY customer_id
+HAVING COUNT(*) BETWEEN 20 AND 30;
+
+
+-- LIMIT and OFFSET clause
+
+-- LIMIT - limit the number of rows that are returned
+SELECT *
+FROM film
+LIMIT 10;
+
+
+-- OFFSET - start your row after a certain number of rows after using OFFSET
+SELECT *
+FROM film
+OFFSET 10; -- SKIP OVER THE FIRST 10 ROWS
+
+-- Put it together
+SELECT *
+FROM film
+OFFSET 10
+LIMIT 5;
+
+
+-- Putting all of the clauses together into one query
+-- Of all customers who have made less than 20 payments and have a customer_id > 350, display those who have spent 11-20th
+SELECT customer_id, COUNT(*), SUM(amount) AS total_spent
+FROM payment
+WHERE customer_id > 350
+GROUP BY customer_id
+HAVING COUNT(*) < 20
+ORDER BY total_spent DESC
+OFFSET 10
+LIMIT 10;
+
+-- SYNTAX ORDER: (SELECT and FROM are the only mandatory)
+
+-- SELECT (columns from the table)
+-- FROM  (table name)
+
+-- WHERE (row filter)
+-- GROUP BY (aggregations)
+-- HAVING (filter aggregations)
+-- ORDER BY (column value ASC or DESC)
+-- OFFSET (number of rows to skip)
+-- LIMIT (Max number of rows to display)
+
+SELECT customer_id, COUNT(*), SUM(amount) AS total_spent FROM payment WHERE customer_id > 350 GROUP BY customer_id HAVING COUNT(*) < 20 ORDER BY total_spent DESC OFFSET 10 LIMIT 10;
 
 
